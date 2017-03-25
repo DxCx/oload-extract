@@ -155,16 +155,54 @@ function openloadExtract(str) {
       return dataAndEvents - deepDataAndEvents;
     }
   };
-  var res = "3|6|2|7|4|0|5|1|8"["split"]("|");
+
   /** @type {number} */
-  var resLength = 0;
-  for (;!![];) {
-    switch(res[resLength++]) {
+  var steps = "3|6|2|7|4|0|5|1|8".split("|");
+  for (var i = 0; i < steps.length; i++) {
+    switch(steps[i]) {
+      case "3":
+        var location = str.substring(progress, fromIndex);
+        var currentIndex = location.charCodeAt(0);
+        var fragment = calls["EKC"](currentIndex, 52);
+        var args = Math["max"](2, fragment);
+        continue;
+
+      case "6":
+        fragment = Math["min"](args, calls["oIa"](calls["oIa"](location.length, 30), 2));
+        continue;
+
+      case "2":
+        var scripts = location.substring(fragment, calls["WNS"](fragment, 30));
+        /** @type {Array} */
+        var parts = new Array(10);
+        /** @type {number} */
+        var key = 0;
+        while (calls["TYf"](key, scripts.length)) {
+          var camelKey = scripts.substring(key, calls["WNS"](key, 3));
+          parts[calls["XcK"](key, 3)] = calls["dFN"](parseInt, camelKey, 8);
+          key += 3;
+        }
+        continue;
+
+      case "7":
+        var original = location.split("");
+        continue;
+
+      case "4":
+        original.splice(fragment, 30);
+        continue;
+
       case "0":
-        var obj = original["join"]("");
+        var obj = original.join("");
         /** @type {Array} */
         var clrs = [];
         continue;
+
+      case "5":
+        /** @type {number} */
+        key = 0;
+        continue;
+
       case "1":
         /** @type {number} */
         var widgetPartAttribute = 0;
@@ -190,41 +228,11 @@ function openloadExtract(str) {
           var spaceAfter = parts[calls["MEA"](widgetPartAttribute, 9)];
           ret ^= 213;
           ret ^= spaceAfter;
-          clrs["push"](String["fromCharCode"](ret));
+          clrs.push(String.fromCharCode(ret));
           widgetPartAttribute += 1;
         }
         continue;
-      case "2":
-        var scripts = location["substring"](fragment, calls["WNS"](fragment, 30));
-        /** @type {Array} */
-        var parts = new Array(10);
-        /** @type {number} */
-        var key = 0;
-        for (;calls["TYf"](key, scripts["length"]);) {
-          var camelKey = scripts["substring"](key, calls["WNS"](key, 3));
-          parts[calls["XcK"](key, 3)] = calls["dFN"](parseInt, camelKey, 8);
-          key += 3;
-        }
-        continue;
-      case "3":
-        var location = str.substring(progress, fromIndex);
-        var currentIndex = location["charCodeAt"](0);
-        var fragment = calls["EKC"](currentIndex, 52);
-        var args = Math["max"](2, fragment);
-        continue;
-      case "4":
-        original["splice"](fragment, 30);
-        continue;
-      case "5":
-        /** @type {number} */
-        key = 0;
-        continue;
-      case "6":
-        fragment = Math["min"](args, calls["oIa"](calls["oIa"](location["length"], 30), 2));
-        continue;
-      case "7":
-        var original = location["split"]("");
-        continue;
+
       case "8":
         return "https://openload.co/stream/" + clrs.join("") + "?mime=true";
     }
