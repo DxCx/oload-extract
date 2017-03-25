@@ -2,115 +2,33 @@
  * @param {string} str
  * @return {?}
  */
-function openloadExtract(str) {
+function openloadExtract(pageContent) {
   /** @type {number} */
-  var fromIndex = str.indexOf("streamurl") - 18;
-  var progress = str.lastIndexOf(">", fromIndex) + 1;
+  var fromIndex = pageContent.indexOf("streamurl") - 18;
+  var progress = pageContent.lastIndexOf(">", fromIndex) + 1;
   var calls = {
     /**
-     * @param {(boolean|number|string)} dataAndEvents
-     * @param {(boolean|number|string)} deepDataAndEvents
-     * @return {?}
-     */
-    "xRD" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents < deepDataAndEvents;
-    },
-    /**
      * @param {number} dataAndEvents
      * @param {number} deepDataAndEvents
      * @return {?}
      */
-    "ZeT" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents + deepDataAndEvents;
-    },
-    /**
-     * @param {number} dataAndEvents
-     * @param {number} deepDataAndEvents
-     * @return {?}
-     */
-    "WNS" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents + deepDataAndEvents;
-    },
-    /**
-     * @param {?} callback
-     * @param {?} events
-     * @param {?} deepDataAndEvents
-     * @return {?}
-     */
-    "BOg" : function clone(callback, events, deepDataAndEvents) {
-      return callback(events, deepDataAndEvents);
-    },
-    /**
-     * @param {?} dataAndEvents
-     * @param {?} deepDataAndEvents
-     * @return {?}
-     */
-    "wqo" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents == deepDataAndEvents;
-    },
-    /**
-     * @param {number} dataAndEvents
-     * @param {number} deepDataAndEvents
-     * @return {?}
-     */
-    "tVi" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents % deepDataAndEvents;
-    },
-    /**
-     * @param {?} dataAndEvents
-     * @param {?} deepDataAndEvents
-     * @return {?}
-     */
-    "OLB" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents == deepDataAndEvents;
-    },
-    /**
-     * @param {number} dataAndEvents
-     * @param {number} deepDataAndEvents
-     * @return {?}
-     */
-    "rZh" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents % deepDataAndEvents;
-    },
-    /**
-     * @param {number} dataAndEvents
-     * @param {number} deepDataAndEvents
-     * @return {?}
-     */
-    "bqe" : function clone(dataAndEvents, deepDataAndEvents) {
+    "neq" : function clone(dataAndEvents, deepDataAndEvents) {
       return dataAndEvents != deepDataAndEvents;
     },
     /**
-     * @param {number} dataAndEvents
-     * @param {number} deepDataAndEvents
-     * @return {?}
-     */
-    "yfs" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents - deepDataAndEvents;
-    },
-    /**
-     * @param {?} callback
-     * @param {?} events
+     * @param {?} dataAndEvents
      * @param {?} deepDataAndEvents
      * @return {?}
      */
-    "FxE" : function clone(callback, events, deepDataAndEvents) {
-      return callback(events, deepDataAndEvents);
-    },
-    /**
-     * @param {number} dataAndEvents
-     * @param {number} deepDataAndEvents
-     * @return {?}
-     */
-    "MEA" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents % deepDataAndEvents;
+    "eq" : function clone(dataAndEvents, deepDataAndEvents) {
+      return dataAndEvents == deepDataAndEvents;
     },
     /**
      * @param {(boolean|number|string)} dataAndEvents
      * @param {(boolean|number|string)} deepDataAndEvents
      * @return {?}
      */
-    "TYf" : function clone(dataAndEvents, deepDataAndEvents) {
+    "lt" : function clone(dataAndEvents, deepDataAndEvents) {
       return dataAndEvents < deepDataAndEvents;
     },
     /**
@@ -118,42 +36,33 @@ function openloadExtract(str) {
      * @param {number} deepDataAndEvents
      * @return {?}
      */
-    "XcK" : function clone(dataAndEvents, deepDataAndEvents) {
+    "add" : function clone(dataAndEvents, deepDataAndEvents) {
+      return dataAndEvents + deepDataAndEvents;
+    },
+    /**
+     * @param {number} dataAndEvents
+     * @param {number} deepDataAndEvents
+     * @return {?}
+     */
+    "modulo" : function clone(dataAndEvents, deepDataAndEvents) {
+      return dataAndEvents % deepDataAndEvents;
+    },
+    /**
+     * @param {number} dataAndEvents
+     * @param {number} deepDataAndEvents
+     * @return {?}
+     */
+    "div" : function div(dataAndEvents, deepDataAndEvents) {
       return dataAndEvents / deepDataAndEvents;
     },
     /**
-     * @param {?} callback
-     * @param {?} events
-     * @param {?} deepDataAndEvents
-     * @return {?}
-     */
-    "dFN" : function clone(callback, events, deepDataAndEvents) {
-      return callback(events, deepDataAndEvents);
-    },
-    /**
-     * @param {?} freezeObject
-     * @param {?} object
-     * @return {?}
-     */
-    "XzN" : function freeze(freezeObject, object) {
-      return freezeObject(object);
-    },
-    /**
      * @param {number} dataAndEvents
      * @param {number} deepDataAndEvents
      * @return {?}
      */
-    "EKC" : function clone(dataAndEvents, deepDataAndEvents) {
+    "sub" : function (dataAndEvents, deepDataAndEvents) {
       return dataAndEvents - deepDataAndEvents;
     },
-    /**
-     * @param {number} dataAndEvents
-     * @param {number} deepDataAndEvents
-     * @return {?}
-     */
-    "oIa" : function clone(dataAndEvents, deepDataAndEvents) {
-      return dataAndEvents - deepDataAndEvents;
-    }
   };
 
   /** @type {number} */
@@ -161,25 +70,25 @@ function openloadExtract(str) {
   for (var i = 0; i < steps.length; i++) {
     switch(steps[i]) {
       case "3":
-        var location = str.substring(progress, fromIndex);
+        var location = pageContent.substring(progress, fromIndex);
         var currentIndex = location.charCodeAt(0);
-        var fragment = calls["EKC"](currentIndex, 52);
-        var args = Math["max"](2, fragment);
+        var fragment = calls["sub"](currentIndex, 52);
+        var args = Math.max(2, fragment);
         continue;
 
       case "6":
-        fragment = Math["min"](args, calls["oIa"](calls["oIa"](location.length, 30), 2));
+        fragment = Math.min(args, calls["sub"](calls["sub"](location.length, 30), 2));
         continue;
 
       case "2":
-        var scripts = location.substring(fragment, calls["WNS"](fragment, 30));
+        var scripts = location.substring(fragment, calls["add"](fragment, 30));
         /** @type {Array} */
         var parts = new Array(10);
         /** @type {number} */
         var key = 0;
-        while (calls["TYf"](key, scripts.length)) {
-          var camelKey = scripts.substring(key, calls["WNS"](key, 3));
-          parts[calls["XcK"](key, 3)] = calls["dFN"](parseInt, camelKey, 8);
+        while (calls["lt"](key, scripts.length)) {
+          var camelKey = scripts.substring(key, calls["add"](key, 3));
+          parts[calls["div"](key, 3)] = parseInt(camelKey, 8);
           key += 3;
         }
         continue;
@@ -206,26 +115,26 @@ function openloadExtract(str) {
       case "1":
         /** @type {number} */
         var widgetPartAttribute = 0;
-        for (;calls["xRD"](key, obj["length"]);) {
-          var values = obj["substring"](key, calls["ZeT"](key, 2));
-          var value = obj["substring"](key, calls["WNS"](key, 3));
-          var node = obj["substring"](key, calls["WNS"](key, 4));
-          var ret = calls["BOg"](parseInt, values, 16);
+        for (;calls["lt"](key, obj.length);) {
+          var values = obj.substring(key, calls["add"](key, 2));
+          var value = obj.substring(key, calls["add"](key, 3));
+          var node = obj.substring(key, calls["add"](key, 4));
+          var ret = parseInt(values, 16);
           key += 2;
-          if (calls["wqo"](calls["tVi"](widgetPartAttribute, 3), 0)) {
-            ret = calls["BOg"](parseInt, value, 8);
+          if (calls["eq"](calls["modulo"](widgetPartAttribute, 3), 0)) {
+            ret = parseInt(value, 8);
             key += 1;
           } else {
-            if (calls["OLB"](calls["rZh"](widgetPartAttribute, 2), 0)) {
+            if (calls["eq"](calls["modulo"](widgetPartAttribute, 2), 0)) {
               if (calls["bqe"](0, widgetPartAttribute)) {
-                if (calls["xRD"](obj[calls["yfs"](widgetPartAttribute, 1)]["charCodeAt"](0), 60)) {
-                  ret = calls["FxE"](parseInt, node, 10);
+                if (calls["lt"](obj[calls["sub"](widgetPartAttribute, 1)]["charCodeAt"](0), 60)) {
+                  ret = parseInt(node, 10);
                   key += 2;
                 }
               }
             }
           }
-          var spaceAfter = parts[calls["MEA"](widgetPartAttribute, 9)];
+          var spaceAfter = parts[calls["modulo"](widgetPartAttribute, 9)];
           ret ^= 213;
           ret ^= spaceAfter;
           clrs.push(String.fromCharCode(ret));
