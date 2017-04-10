@@ -115,8 +115,9 @@ function formatJs(js) {
   const c = unpackStringArr(b);
   const d = expandOneLiners(c);
   const e = replaceKeyAccess(d);
+  const result = e;
 
-  const final = e.split('\n');
+  const final = beautify(result, { indent_size: 2 }).split('\n');
   // Debug
   final.forEach((line, i) => {
     console.log(`${i}\t${line}`);
