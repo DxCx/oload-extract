@@ -114,7 +114,18 @@ function UnflatterRecursive(block) {
   if ( !block.body ) {
     return block;
   }
-  console.log(block);
+
+  // Hunting the initial var = ... while ...
+  if ( block.body &&
+       block.body[0] &&
+       'VariableDeclaration' === block.body[0].type &&
+       block.body[1] &&
+       'WhileStatement' === block.body[1].type) {
+    return UnflatterASTBegin(block);
+  }
+
+  // Getting deeper
+  block.body = UnflatterRecursive(block.body);
   return block;
 }
 
