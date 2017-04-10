@@ -1,4 +1,5 @@
 const request = require('request');
+const astify = require('astify');
 const beautify = require('js-beautify').js_beautify;
 const vm = require('vm');
 
@@ -109,13 +110,96 @@ function replaceKeyAccess(js) {
   });
 }
 
+function UnflatterRecursive(block) {
+  if ( !block.body ) {
+    return block;
+  }
+  console.log(block);
+  return block;
+}
+
+function UnflatterASTWhile(executeOrder, block) {
+  if ( block.type !== 'WhileStatement' ) {
+    return block;
+  }
+
+  if ( ! block.body.body[0] ||
+       'SwitchStatement' !== block.body.body[0].type ||
+       ! block.body.body[1] ||
+       'BreakStatement' !== block.body.body[1].type) {
+    return block;
+  }
+
+  const switchCasesAST = block.body.body[0].cases;
+  const orderedBlocks = executeOrder.reduce((curArr, blockId) => {
+    switchCasesAST[blockId].consequent.forEach((codeBlock) => {
+      if ( codeBlock.type === 'ContinueStatement' ) {
+        return;
+      }
+
+      curArr.push(UnflatterRecursive(codeBlock));
+    });
+
+    return curArr;
+  }, []);
+
+  return new astify.ASTNode.types.BlockStatement(orderedBlocks);
+}
+
+// First part of pattern, var XX = "".split("|"); while
+function UnflatterASTBegin(block) {
+  if ( !block.type ) {
+    return block;
+  }
+
+  // Hunting the initial var = ... while ...
+  if ( ! block.body ||
+       ! block.body[0] ||
+       'VariableDeclaration' !== block.body[0].type ||
+       ! block.body[1] ||
+       'WhileStatement' !== block.body[1].type) {
+    return block;
+  }
+
+  if ( ! block.body[0].declarations[0] ||
+       ! block.body[0].declarations[0].init ||
+       ! block.body[0].declarations[0].init.callee ||
+       ! block.body[0].declarations[0].init.callee.property ||
+       'split' !== block.body[0].declarations[0].init.callee.property.name ||
+       ! block.body[0].declarations[0].init.callee.object ||
+       undefined === block.body[0].declarations[0].init.callee.object.value) {
+    return block;
+  }
+
+  if ( ! block.body[0].declarations[1] ||
+       ! block.body[0].declarations[1].init ||
+       undefined === block.body[0].declarations[1].init.value ) {
+    return block;
+  }
+
+  // extract the execute order out of the string.
+  const executeOrder = block.body[0].declarations[0].init.callee.object.value.split("|");
+  return UnflatterASTWhile(executeOrder, block.body[1]);
+}
+
+function unflatter(js) {
+  // convert to AST
+  const ast = new astify.AST(4, undefined, js);
+  // extract only the main function
+  const func = ast.ast.body[0].expression.arguments[0].body;
+
+  // Unflatter the AST (Recursive)
+  return UnflatterASTBegin(func).toSource();
+}
+
 function formatJs(js) {
   const a = decodeEscapeSequance(js);
   const b = beautify(a, { indent_size: 2 });
   const c = unpackStringArr(b);
   const d = expandOneLiners(c);
   const e = replaceKeyAccess(d);
-  const result = e;
+  const f = unflatter(e);
+  const result = f;
 
   const final = beautify(result, { indent_size: 2 }).split('\n');
   // Debug

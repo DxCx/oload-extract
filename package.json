@@ -8,6 +8,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "astify": "0.0.4",
     "request": "^2.81.0"
   },
   "devDependencies": {},
