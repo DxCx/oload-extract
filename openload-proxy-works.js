@@ -49,18 +49,80 @@ function unpackStringArr(js) {
   });
 }
 
+function expandOneLiners(js) {
+  // First, get the table and strip it out of the JS.
+  let varName = '';
+  let funcMapString = '';
+  const strippedJs = js.replace(/var\s(.+?)\s=\s\{([\S\s.]+?)\};/m, function(fullMatch, vn, fms) {
+    varName = vn;
+    funcMapString = fms;
+    return '';
+  });
+
+  // Parse the table into funcMap
+  const funcMapRegex = new RegExp(/'(.+?)':\sfunction\s.+?\((.+?)\)\s\{[\S\s]+?return\s(.+?);/, 'gm');
+  const funcMap = {};
+  let matchObj;
+  while ( matchObj = funcMapRegex.exec(funcMapString) ) {
+    funcMap[matchObj[1]] = {
+      args: matchObj[2].split(",").map((v) => v.trim()),
+      template: matchObj[3],
+    };
+  }
+
+  const expanedRegex = new RegExp(`${varName}\\['(\\w+?)'\\]\\(([^\(\)]+?)\\)`);
+  const finalExpanedRegex = new RegExp(`${varName}\\['(\\w+?)'\\]\\((.+)\\)`);
+  const replaceFuncGen = (regexSplit) => function (full, templateName, templateArgsString) {
+    if ( ! funcMap.hasOwnProperty(templateName) ) {
+      throw new Error(`Invalid template name found ${templateName}`);
+    }
+    const templateArgs = regexSplit ?
+      templateArgsString.match(/(\(.*?\)|[^\(\),\s])+(?=.*,|.*$)/g) :
+      templateArgsString.split(",").map((v) => v.trim());
+
+    if ( templateArgs.length !== funcMap[templateName].args.length ) {
+      throw new Error(`Arguments ${templateArgs} doesn't match template ${templateName}`);
+    }
+    let line = funcMap[templateName].template;
+    funcMap[templateName].args.forEach((argName, argId) => {
+      line = line.replace(argName, templateArgs[argId]);
+    });
+    return line;
+  };
+
+  let expandedJs = strippedJs;
+  // First of all, Expanding all "Simple" calls
+  while ( expandedJs.match(expanedRegex) ) {
+    expandedJs = expandedJs.replace(expanedRegex, replaceFuncGen(false));
+  }
+  // Next expand the more generic regex ones.
+  while ( expandedJs.match(finalExpanedRegex) ) {
+    expandedJs = expandedJs.replace(finalExpanedRegex, replaceFuncGen(true));
+  }
+
+  return expandedJs;
+}
+
+function replaceKeyAccess(js) {
+  return js.replace(/(.+?)\['(\w+)'\]/g, function(f, varName, keyName) {
+    return `${varName}.${keyName}`;
+  });
+}
+
 function formatJs(js) {
   const a = decodeEscapeSequance(js);
   const b = beautify(a, { indent_size: 2 });
   const c = unpackStringArr(b);
-  const d = c.split('\n');
+  const d = expandOneLiners(c);
+  const e = replaceKeyAccess(d);
 
+  const final = e.split('\n');
   // Debug
-  d.forEach((line, i) => {
+  final.forEach((line, i) => {
     console.log(`${i}\t${line}`);
+    //console.log(line);
   });
-
-  return d.join('\n');
+  return final.join('\n');
 }
 
 const openload = (url, cb) =>
@@ -76,6 +138,7 @@ const openload = (url, cb) =>
         doctype: '',
         write: (v) => console.log(v),
         getElementById: "[native code",
+        getElementsByTagName: "[native code",
         createElement: "[native code",
         ready: (f) => f(),
       };
@@ -86,7 +149,7 @@ const openload = (url, cb) =>
         alert: "[native code",
       };
 
-      var $ = (ident) => {
+      var jQuery = (ident) => {
         if ( typeof ident !== 'string' ) {
           return ident;
         }
@@ -112,6 +175,7 @@ const openload = (url, cb) =>
           console.log('wtf - ', ident);
         }
       };
+    var $ = jQuery;
     `;
 
     r = body.lastIndexOf('</script>')
@@ -119,7 +183,7 @@ const openload = (url, cb) =>
     l = body.lastIndexOf('<script', r)
     l = body.indexOf('var', l)
     const sandbox = { console, Math };
-    // let finalJs = patch + formatJs(body.substring(l, r));
+    //let finalJs = patch + formatJs(body.substring(l, r));
     let finalJs = patch + body.substring(l, r);
     const vmScript = new vm.Script(finalJs);
     vmScript.runInNewContext(sandbox)
