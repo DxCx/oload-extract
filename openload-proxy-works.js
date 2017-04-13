@@ -225,53 +225,39 @@ const openload = (url, cb) =>
   request(url, (err, response, body) => {
     let r = body.indexOf('streamurl') - 18
     let l = body.lastIndexOf('>', r) + 1
-    let idl = body.lastIndexOf('=', l) + 2;
-    let idr = body.lastIndexOf('"', l);
+    //let idl = body.lastIndexOf('=', l) + 2;
+    //let idr = body.lastIndexOf('"', l);
+    //var g = '${body.substring(idl, idr)}';
 
     const patch = `
-      var g = '${body.substring(idl, idr)}';
+      var g = 0;
       var document = {
-        doctype: '',
         write: (v) => console.log(v),
         getElementById: "[native code",
-        getElementsByTagName: "[native code",
-        createElement: "[native code",
+        createTextNode: "[native code",
         ready: (f) => f(),
       };
-      var navigator = {
-        userAgent: '',
-      };
-      var window = {
-        alert: "[native code",
-      };
+      var window = {};
 
-      var jQuery = (ident) => {
+      var $ = (ident) => {
         if ( typeof ident !== 'string' ) {
           return ident;
         }
 
-        // TODO: Continue debuging
-        if ( ident === '#streamurl' ) {
-          return ({
-            text: streamurl => {
-              if (streamurl) {
-                flag = streamurl;
-              } else {
-                throw new Error('Shouldn\\\'t read in here');
-              }
-            }
-          });
-        } else if (ident === '#' + g) {
-          return ({
-            text: () => {
+        return ({
+          text: streamurl => {
+            if (streamurl) {
+              flag = streamurl;
+            } else {
               return '${body.substring(l, r)}'
-            },
-          });
-        } else {
-          console.log('wtf - ', ident);
-        }
-      };
-    var $ = jQuery;
+            }
+          }
+        });
+      }
+
+      var jQuery = {
+        post: '',
+      }
     `;
 
     r = body.lastIndexOf('</script>')
@@ -279,8 +265,10 @@ const openload = (url, cb) =>
     l = body.lastIndexOf('<script', r)
     l = body.indexOf('var', l)
     const sandbox = { console, Math };
-    //let finalJs = patch + formatJs(body.substring(l, r));
-    let finalJs = patch + body.substring(l, r);
+    //const cleanRunJs = formatJs(body.substring(l, r));
+    const cleanRunJs = body.substring(l, r);
+    //require('fs').writeFileSync('openload-extracted.js', cleanRunJs);
+    let finalJs = patch + cleanRunJs;
     const vmScript = new vm.Script(finalJs);
     vmScript.runInNewContext(sandbox)
     cb(`https://openload.co/stream/${sandbox.flag}?mime=true`);
