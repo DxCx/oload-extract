@@ -225,17 +225,22 @@ const openload = (url, cb) =>
   request(url, (err, response, body) => {
     let r = body.indexOf('streamurl') - 18
     let l = body.lastIndexOf('>', r) + 1
-    //let idl = body.lastIndexOf('=', l) + 2;
-    //let idr = body.lastIndexOf('"', l);
-    //var g = '${body.substring(idl, idr)}';
 
     const patch = `
-      var g = 0;
+      var z = 0;
       var document = {
         write: (v) => console.log(v),
         getElementById: "[native code",
         createTextNode: "[native code",
+        documentElement: {
+          getAttribute() {
+            return null;
+          },
+        },
         ready: (f) => f(),
+      };
+      var navigator = {
+        userAgent: '',
       };
       var window = {};
 
